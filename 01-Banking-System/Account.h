@@ -1,12 +1,15 @@
 #pragma once
-#include <string>
 #include <mutex>
+#include <shared_mutex>
+#include <cstdint>
 
 class Account{
     private:
         long long balance;
-        std::string name;
-        mutable std::mutex mtx;
+        uint64_t id;
+
+        // replacing the normal mutex locks with a read/write locks allowing for multiple threads to do read operations. 
+        mutable std::shared_mutex rw_mutex;
 
         void setBalance(long long amount);
         long long getBalanceInternal();
@@ -14,7 +17,7 @@ class Account{
         friend class Bank;
 
     public:
-        Account(long long amount, std::string& name);
+        Account(long long amount);
 
         void deposit(long long amount);
 
@@ -22,6 +25,5 @@ class Account{
 
         long long getBalance() const;
 
-        // bool transfer(Account& account, long long amount);
-        std::mutex& getMutex();
+        std::shared_mutex& getMutex();
 };

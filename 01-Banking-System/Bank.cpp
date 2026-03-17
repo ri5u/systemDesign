@@ -1,18 +1,11 @@
 #include "Bank.h"
-#include <utility>
 
-bool Bank::transer(Account& from, Account& to, long long amount) {
+bool Bank::transfer(Account& from, Account& to, long long amount) {
     if(&from == &to) return false;
-    
-    Account* first = &from;
-    Account* second = &to;
-
-    if(first > second) {
-        std::swap(first, second);
-    }
-
-    first->getMutex().lock();
-    second->getMutex().lock();
+      
+    //This scoped lock ensures that both the locks are acquired safely without causing any deadlocks. 
+    //And also ensures RAII
+    std::scoped_lock lock(from.rw_mutex, to.rw_mutex);
 
     long long fromAccountBalance = from.getBalanceInternal();
     long long toAccountBalance = to.getBalanceInternal();
@@ -22,9 +15,6 @@ bool Bank::transer(Account& from, Account& to, long long amount) {
         from.setBalance(fromAccountBalance - amount);        
         to.setBalance(toAccountBalance + amount);        
     }
-
-    first->getMutex().unlock();
-    second->getMutex().unlock();
 
     return success;
 }

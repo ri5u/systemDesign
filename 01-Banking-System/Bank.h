@@ -2,5 +2,5 @@
 
 class Bank{
     public:
-        static bool transer(Account& from, Account& to, long long amount);
+        static bool transfer(Account& from, Account& to, long long amount);
 };

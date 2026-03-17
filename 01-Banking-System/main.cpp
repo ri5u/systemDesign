@@ -4,19 +4,18 @@
 #include <thread>
 
 int main(){
-    std::string name = "John Doe";
-    Account myAccount1(100, name);
-    Account myAccount2(100, name);
+    Account myAccount1(100);
+    Account myAccount2(100);
 
     std::thread t1([&]() {
         for(long i = 1; i <= 100; i++) {
-            Bank::transer(myAccount1, myAccount2, 1);
+            Bank::transfer(myAccount1, myAccount2, 1);
         }
     });
 
     std::thread t2([&]() {
         for(int i = 1; i <= 10; i++) {
-            Bank::transer(myAccount2, myAccount1, 1);
+            Bank::transfer(myAccount2, myAccount1, 1);
         }
     });
 
