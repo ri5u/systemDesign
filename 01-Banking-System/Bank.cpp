@@ -1,4 +1,24 @@
 #include "Bank.h"
+#include <memory>
+
+uint64_t Bank::createAccount(long long balance){
+    std::shared_ptr<Account> newAccount = std::make_shared<Account>(balance); 
+    uint64_t id = newAccount->getId();
+    
+    std::unique_lock lock(registryMutex);
+    accounts[id] = newAccount;
+    
+    return id;
+}
+
+std::shared_ptr<Account> Bank::getAccount(uint64_t id){
+    std::shared_lock lock(registryMutex);
+    auto it = accounts.find(id);
+    
+    if(it == accounts.end()) return nullptr;
+
+    return it->second;
+}
 
 bool Bank::transfer(Account& from, Account& to, long long amount) {
     if(&from == &to) return false;

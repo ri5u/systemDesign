@@ -10,6 +10,10 @@ Account::Account(long long amount){
     this->id = global_id_counter.fetch_add(1);
 }
 
+uint64_t Account::getId(){
+    return this->id;
+}
+
 void Account::setBalance(long long amount) {
     this->balance = amount;
 }

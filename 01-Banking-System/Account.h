@@ -10,7 +10,8 @@ class Account{
 
         // replacing the normal mutex locks with a read/write locks allowing for multiple threads to do read operations. 
         mutable std::shared_mutex rw_mutex;
-
+        
+        uint64_t getId();
         void setBalance(long long amount);
         long long getBalanceInternal();
 
