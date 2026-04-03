@@ -8,22 +8,18 @@
 
 class ThreadPool{
 private: 
-    //all the workers thread
     std::vector<std::thread> workers;
-
-    //The task queue
-    std::queue<std::function<void()>> tasks;
-    
+    std::queue<std::function<void()>> tasksQueue;
     std::mutex queueMutex;
-    std::counting_semaphore<100> taskSemaphore(100);
-
+    std::counting_semaphore<100000> taskSemaphore;
     std::atomic<bool> stopFlag;
 
     void workerLoop();
 
 public:
-    ThreadPool(size_t numThread);
+    ThreadPool();
     ~ThreadPool();
-    
+    void start(); 
+    void stop();
     void pushTask(std::function<void()> task);
 };

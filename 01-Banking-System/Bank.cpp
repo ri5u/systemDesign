@@ -20,20 +20,24 @@ std::shared_ptr<Account> Bank::getAccount(uint64_t id){
     return it->second;
 }
 
-bool Bank::transfer(Account& from, Account& to, long long amount) {
-    if(&from == &to) return false;
+bool Bank::transfer(uint64_t fromId, uint64_t toId, long long amount) {
+    auto from = getAccount(fromId);
+    auto to  = getAccount(toId);
+   
+    if(!from || !to) return false;
+    if(from == to) return false;
       
     //This scoped lock ensures that both the locks are acquired safely without causing any deadlocks. 
     //And also ensures RAII
-    std::scoped_lock lock(from.rw_mutex, to.rw_mutex);
+    std::scoped_lock lock(from->rw_mutex, to->rw_mutex);
 
-    long long fromAccountBalance = from.getBalanceInternal();
-    long long toAccountBalance = to.getBalanceInternal();
+    long long fromAccountBalance = from->getBalanceInternal();
+    long long toAccountBalance = to->getBalanceInternal();
     bool success = false;
     if(fromAccountBalance >= amount) {
         success = true;
-        from.setBalance(fromAccountBalance - amount);        
-        to.setBalance(toAccountBalance + amount);        
+        from->setBalance(fromAccountBalance - amount);        
+        to->setBalance(toAccountBalance + amount);        
     }
 
     return success;
