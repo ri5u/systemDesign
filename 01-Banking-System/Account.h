@@ -20,9 +20,9 @@ class Account{
     public:
         Account(long long amount);
 
-        void deposit(long long amount);
+        void deposit(double amount);
 
-        bool withdraw(long long amount);
+        bool withdraw(double amount);
 
         long long getBalance() const;
 

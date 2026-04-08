@@ -2,12 +2,12 @@
 #include <functional>
 #include <mutex>
 #include <thread>
-ThreadPool::ThreadPool() : taskSemaphore(0) , stopFlag(false) {}
+
+ThreadPool::ThreadPool(size_t numThreads) : taskSemaphore(0) , stopFlag(false), numThreads(numThreads) {}
+
 void ThreadPool::start() {
-    const int num_workers = std::thread::hardware_concurrency();
-    // const int num_workers = 2;
-    for(int i = 0; i < num_workers; i++){
-        workers.emplace_back(std::thread(&ThreadPool::workerLoop, this));
+    for(size_t i = 0; i < numThreads; i++){
+        workers.emplace_back(&ThreadPool::workerLoop, this);
     }
 }
 
@@ -18,9 +18,9 @@ void ThreadPool::workerLoop() {
         std::function<void()> task;
         {
             std::lock_guard<std::mutex> lock(queueMutex);
-            if(tasksQueue.empty()) continue;
-            task = tasksQueue.front();
-            tasksQueue.pop();
+            if(tasks.empty()) continue;
+            task = std::move(tasks.front());
+            tasks.pop();
         }
 
         task();
@@ -30,20 +30,23 @@ void ThreadPool::workerLoop() {
 void ThreadPool::pushTask(std::function<void()> task) {
     {
         std::lock_guard<std::mutex> lock(queueMutex);
-        tasksQueue.push(task);
+        tasks.push(std::move(task));
     }
     taskSemaphore.release(); 
 }
 
 void ThreadPool::stop() {
+    if (stopFlag) return;
     stopFlag = true;
     taskSemaphore.release(workers.size());
     for(std::thread& active_workers : workers){
-        active_workers.join();
+        if (active_workers.joinable()) {
+            active_workers.join();
+        }
     }
     workers.clear();
 }
 
 ThreadPool::~ThreadPool() {
-    ThreadPool::stop();
+    stop();
 }

@@ -1,5 +1,6 @@
 #include "Account.h"
 #include <atomic>
+#include <cmath>
 
 //we use this as an id for the new accounts. During constructor call the id is incremented and assigned to the account id. 
 //atomic to make sure that the id increment operation is atomic and prevents race condition. 
@@ -22,18 +23,20 @@ long long Account::getBalanceInternal() {
     return this->balance;
 }
 
-void Account::deposit(long long amount) {
+void Account::deposit(double amount) {
+    long long amountPaise = static_cast<long long>(std::round(amount * 100));
     std::unique_lock lock(rw_mutex);
-    setBalance(this->balance + amount);
+    setBalance(this->balance + amountPaise);
 }
 
-bool Account::withdraw(long long amount) {
+bool Account::withdraw(double amount) {
+    long long amountPaise = static_cast<long long>(std::round(amount * 100));
     std::unique_lock lock(rw_mutex);
-    if(amount > this->balance) {
+    if(amountPaise > this->balance) {
         return false;
     }
     
-    setBalance(this->balance - amount);
+    setBalance(this->balance - amountPaise);
     return true;
 }
 
